@@ -63,6 +63,35 @@ unnamed stops as `kbd-stop-unnamed`. Stops are numbered the same way as the Keyb
 report, but a live page can serve different content from one load to the next, so the numbers
 can shift between runs.
 
+## Run it in GitHub Actions
+
+[.github/workflows/accessibility.yml](.github/workflows/accessibility.yml) runs the audit and the
+narration on GitHub's Windows runners. It is manual: open the **Actions** tab, choose
+**Accessibility audit and narration**, then **Run workflow**. (The workflow has to be on the
+default branch before the button appears.)
+
+| Input | Default | Effect |
+|---|---|---|
+| `run` | `both` | `audit`, `narration` or `both`. The two are separate jobs and run in parallel. |
+| `fail_on` | `serious` | Severity that fails the audit job; `none` reports without failing. Same as `A11Y_FAIL_ON`. |
+| `urls` | (empty) | Comma-separated URLs to test instead of the Fundraiser demo. Same as `A11Y_URLS`. |
+| `voice` | `Microsoft Zira Desktop` | Windows voice. If the runner does not have it, the first English voice is used and the run says so. |
+| `voice_rate` | `0` | Speaking rate, `-10` to `10`. |
+| `narrate_max` | (empty) | Narrate only the first N tab stops, for a quick trial. |
+
+Each run page shows a summary, and two artifacts are kept for 14 days:
+
+- `accessibility-report`: `a11y-report.html` (open it first), the CSV and JSON, the evidence screenshots, and Playwright's own report.
+- `narration-videos`: one folder per page with `screen-reader.mp4`, the captions and the transcript.
+
+The audit job goes red when violations at or above `fail_on` are found; the report is uploaded
+either way. The narration job does not gate on what it finds. It runs `npm run narrate:selfcheck`
+first as a warning-only check that the voice and picture are in step on that runner.
+
+The narration needs the Windows speech synthesizer, so it cannot run on a Linux runner. The audit
+runs on Windows too so its results match a local `npm test`; to move it to Linux, change its
+`runs-on` and expect small differences from font fallback.
+
 ## Settings
 
 | Variable | Default | Effect |
@@ -146,6 +175,7 @@ runs against the local copy, which has no server: the sample gift stays in the p
 ## Layout
 
 ```
+.github/workflows/  the audit + narration workflow
 config/      pages under test; standard, thresholds, owner and region rules
 demo/        local copy of the Fundraiser demo app that the registry audits
 src/core/    axe wrapper, findings model, ownership, evidence, page readiness, WCAG map
@@ -156,4 +186,5 @@ src/reporting  Playwright reporter, report model, HTML template
 src/narration  spoken phrasing, Windows voice, audio/video merge, the recorder
 tests/       00 self-check · 01 baseline · 02 states · 03 keyboard · 04 structure · 05 responsive
 narration/   narrated keyboard walk and its self-check
+scripts/     report self-scan, and the helpers the workflow uses (voice choice, run summary)
 ```

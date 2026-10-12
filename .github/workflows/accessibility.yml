@@ -1,0 +1,135 @@
+name: Accessibility audit and narration
+
+# Run it from the Actions tab: Accessibility audit and narration > Run workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      run:
+        description: What to run
+        type: choice
+        options: [both, audit, narration]
+        default: both
+      fail_on:
+        description: Audit fails the job at this severity or worse (none = report only)
+        type: choice
+        options: [serious, critical, moderate, minor, none]
+        default: serious
+      urls:
+        description: Comma-separated URLs to test instead of the Fundraiser demo (leave empty for the demo)
+        type: string
+        default: ''
+      voice:
+        description: Windows voice for the narration
+        type: string
+        default: Microsoft Zira Desktop
+      voice_rate:
+        description: Speaking rate, -10 (slowest) to 10
+        type: string
+        default: '0'
+      narrate_max:
+        description: Narrate only the first N tab stops (leave empty for the whole page)
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Accessibility audit
+    if: inputs.run != 'narration'
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      A11Y_FAIL_ON: ${{ inputs.fail_on }}
+      A11Y_URLS: ${{ inputs.urls }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx playwright install chromium
+
+      # Exits non-zero when violations at or above fail_on are found. That is the audit doing its job.
+      - name: Run the accessibility tests
+        run: npm test
+
+      - name: Write job summary
+        if: ${{ !cancelled() }}
+        run: node scripts/ci-summary.js audit
+
+      - name: Upload the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: accessibility-report
+          path: |
+            reports/a11y-report.html
+            reports/a11y-violations.csv
+            reports/a11y-results.json
+            reports/evidence
+            reports/playwright-html
+          if-no-files-found: warn
+          retention-days: 14
+
+  narrate:
+    name: Narrated keyboard walk
+    if: inputs.run != 'audit'
+    # The voice is the Windows speech synthesizer (System.Speech), so this only runs on Windows.
+    runs-on: windows-latest
+    timeout-minutes: 90
+    env:
+      A11Y_URLS: ${{ inputs.urls }}
+      A11Y_VOICE_RATE: ${{ inputs.voice_rate }}
+      A11Y_NARRATE_MAX: ${{ inputs.narrate_max }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx playwright install chromium
+
+      # Fails fast, with the list of installed voices, if the runner has none to speak with.
+      - name: Choose a voice
+        shell: powershell
+        env:
+          REQUESTED_VOICE: ${{ inputs.voice }}
+        run: ./scripts/select-voice.ps1
+
+      # Confirms the voice and the video are in step on this runner. A failure here is a warning,
+      # not a reason to withhold the videos.
+      - name: Narration self-check
+        continue-on-error: true
+        run: npm run narrate:selfcheck
+
+      - name: Record the narrated walks
+        run: npm run narrate
+
+      - name: Write job summary
+        if: ${{ !cancelled() }}
+        run: node scripts/ci-summary.js narration
+
+      - name: Upload the videos
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: narration-videos
+          path: |
+            reports/narration
+            !reports/narration/.cache/**
+            !reports/narration/.playwright/**
+            !reports/narration/selfcheck-*/**
+          if-no-files-found: warn
+          retention-days: 14
+          # The MP4s are already compressed.
+          compression-level: 0
