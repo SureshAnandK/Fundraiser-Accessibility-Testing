@@ -1,0 +1,29 @@
+{
+  "name": "andhra-fundraiser-accessibility-testing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright + axe-core accessibility audit of the University of Andhra Fundraiser demo (WCAG 2.2 AA)",
+  "scripts": {
+    "test": "playwright test",
+    "test:audit": "cross-env A11Y_FAIL_ON=none playwright test",
+    "test:selfcheck": "playwright test tests/00-selfcheck.spec.ts",
+    "test:desktop": "playwright test --project=desktop-chromium",
+    "test:mobile": "playwright test --project=mobile-chromium",
+    "test:headed": "cross-env HEADED=1 playwright test",
+    "narrate": "playwright test -c playwright.narrate.config.ts screen-reader",
+    "narrate:selfcheck": "playwright test -c playwright.narrate.config.ts selfcheck",
+    "narrate:headed": "cross-env HEADED=1 playwright test -c playwright.narrate.config.ts screen-reader",
+    "typecheck": "tsc --noEmit",
+    "check:report": "node scripts/check-report.js",
+    "report": "playwright show-report reports/playwright-html"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^24.0.0",
+    "axe-core": "~4.13.0",
+    "cross-env": "^7.0.3",
+    "ffmpeg-static": "^5.3.0",
+    "typescript": "^7.0.2"
+  }
+}

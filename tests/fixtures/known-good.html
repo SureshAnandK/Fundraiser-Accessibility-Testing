@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!-- Detector self-check: a small page with no accessibility defects. The suite must report nothing. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Known-good fixture</title>
+  <style>
+    body { font: 16px/1.5 Arial, sans-serif; color: #111; background: #fff; margin: 0; }
+    header, nav, main, footer { padding: 12px 16px; }
+    .skip { position: absolute; left: 8px; top: -60px; background: #003a8c; color: #fff; padding: 8px 12px; }
+    .skip:focus { top: 8px; }
+    a { color: #003a8c; }
+    a, button, input { min-height: 28px; }
+    nav a { display: inline-block; padding: 6px 10px; }
+    button { padding: 6px 14px; font: inherit; }
+    input { padding: 4px 8px; font: inherit; }
+    img { max-width: 100%; height: auto; }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+
+  <header>
+    <p>Example Store</p>
+  </header>
+
+  <nav aria-label="Primary">
+    <a href="#shop">Shop</a>
+    <a href="#help">Help</a>
+  </nav>
+
+  <main id="content" tabindex="-1">
+    <h1>Known-good fixture</h1>
+    <p>This page is written to be accessible, so every check in the suite should pass on it.</p>
+
+    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="120" height="60" alt="Two students reading together in a campus library">
+
+    <h2>Stay in touch</h2>
+    <form action="#" onsubmit="return false">
+      <p>
+        <label for="email">Email address</label>
+        <input id="email" type="email" autocomplete="email">
+      </p>
+      <button type="submit">Subscribe</button>
+    </form>
+  </main>
+
+  <footer>
+    <p><a href="#privacy">Privacy policy</a></p>
+  </footer>
+</body>
+</html>

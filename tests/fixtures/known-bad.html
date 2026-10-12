@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<!-- Detector self-check: every defect below is planted on purpose. Do not "fix" this file. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Known-bad fixture</title>
+  <style>
+    body { font: 16px/1.4 Arial, sans-serif; color: #111; background: #fff; margin: 16px; }
+    .faint { color: #b5b5b5; }
+    .no-ring:focus, .no-ring:focus-visible { outline: none; }
+    .wide { width: 900px; height: 30px; background: #ddd; }
+    .tight { width: 230px; height: 20px; overflow: hidden; font-size: 14px; line-height: 20px; }
+    .mage-error { color: #b30000; }
+  </style>
+</head>
+<body>
+  <!-- skip link whose target does not exist -->
+  <a href="#nowhere">Skip to content</a>
+
+  <main>
+    <h1>Known-bad fixture</h1>
+
+    <!-- image with no alt; image whose alt is a file name -->
+    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="120" height="60">
+    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="120" height="60" alt="IMG_20231.jpg">
+
+    <!-- text below the 4.5:1 contrast minimum -->
+    <p class="faint">This paragraph is far too faint to read comfortably on a white background.</p>
+
+    <!-- bold paragraph acting as a heading -->
+    <p><strong>Delivery information</strong></p>
+    <p>Orders are dispatched within two working days and arrive by tracked courier. This sentence exists so the paragraph is long enough to count as body text.</p>
+
+    <!-- input with no label; button with no name -->
+    <input type="text">
+    <button></button>
+
+    <!-- link with the focus ring removed -->
+    <a href="#a" class="no-ring">Link without a focus ring</a>
+
+    <!-- clickable div that is not a control; role=button that cannot take focus -->
+    <div style="cursor: pointer; width: 120px; height: 30px;" onclick="void 0">Buy now</div>
+    <div role="button">Fake button</div>
+
+    <!-- active tab reported as not selected -->
+    <div role="tablist" aria-label="Sample tabs">
+      <button role="tab" id="t1" aria-selected="false" aria-controls="p1">Details</button>
+      <div role="tabpanel" id="p1" aria-labelledby="t1">Panel content is visible.</div>
+    </div>
+
+    <!-- validation message not tied to its field -->
+    <label for="e1">Email</label>
+    <input id="e1" type="email" autocomplete="email">
+    <div class="mage-error" id="e1-error">Please enter a valid email address.</div>
+
+    <!-- box that clips its text once WCAG text spacing is applied -->
+    <div class="tight">Fits on one line until spaced out</div>
+
+    <!-- wider than a 320px viewport -->
+    <div class="wide">Fixed-width block</div>
+
+    <!-- keyboard trap: Tab is swallowed. Last in the tab order so earlier stops are still walked. -->
+    <label for="trap">Trap</label>
+    <input id="trap" type="text" onkeydown="if (event.key === 'Tab') event.preventDefault()">
+  </main>
+</body>
+</html>
